@@ -19,6 +19,14 @@ Files: .github/pull_request_template.md
 Copyright: 2021 The HedgeDoc developers (see AUTHORS file)
 License: CC-BY-SA-4.0
 
+Files: public/**
+Copyright: 2021 The HedgeDoc developers (see AUTHORS file)
+License: CC-BY-SA-4.0
+
+Files: public/img/avatar.png
+Copyright: publicdomainvectors.org
+License: CC0-1.0
+
 Files: docs/**/*.md
 Copyright: 2021 The HedgeDoc developers (see AUTHORS file)
 License: CC-BY-SA-4.0
