@@ -62,14 +62,25 @@ createConnection({
     notes.push(Note.create(null, 'slide-example') as Note);
 
     for (let i = 0; i < 3; i++) {
-      const author = connection.manager.create(Author, Author.create(1));
       const user = connection.manager.create(User, users[i]);
       user.email = 'test@hedgedoc.test';
       user.photo = '/mock-backend/img/avatar.png';
       const identity = Identity.create(user, ProviderType.LOCAL, false);
       identity.passwordHash = await hashPassword(password);
       connection.manager.create(Identity, identity);
-      author.user = Promise.resolve(user);
+      await connection.manager.save([user, identity]);
+    }
+
+    const createdUsers = await connection.manager.find(User);
+    const groupEveryone = connection.manager.create(
+      Group,
+      Group.create('_EVERYONE', 'Everyone', true),
+    );
+    await connection.manager.save([groupEveryone]);
+
+    for (let i = 0; i < 3; i++) {
+      const author = connection.manager.create(Author, Author.create(1));
+      author.user = Promise.resolve(createdUsers[0]);
       const revision = Revision.create(
         'This is a test note',
         'This is a test note',
@@ -78,18 +89,39 @@ createConnection({
       const edit = Edit.create(author, 1, 42) as Edit;
       revision.edits = Promise.resolve([edit]);
       notes[i].revisions = Promise.all([revision]);
-      const permission = NoteUserPermission.create(user, notes[i], true);
-      notes[i].userPermissions = Promise.resolve([permission]);
-      notes[i].groupPermissions = Promise.resolve([]);
-      user.ownedNotes = Promise.resolve([notes[i]]);
-      await connection.manager.save([
-        notes[i],
-        user,
-        revision,
-        edit,
-        author,
-        identity,
-      ]);
+      await connection.manager.save([notes[i], revision, edit, author]);
+
+      if (i === 0) {
+        const permission1 = NoteUserPermission.create(
+          createdUsers[0],
+          notes[i],
+          true,
+        );
+        const permission2 = NoteUserPermission.create(
+          createdUsers[1],
+          notes[i],
+          false,
+        );
+        notes[i].userPermissions = Promise.resolve([permission1, permission2]);
+        notes[i].groupPermissions = Promise.resolve([]);
+        await connection.manager.save([notes[i], permission1, permission2]);
+      }
+
+      if (i === 1) {
+        const readPermission = NoteGroupPermission.create(
+          groupEveryone,
+          notes[i],
+          false,
+        );
+        notes[i].userPermissions = Promise.resolve([]);
+        notes[i].groupPermissions = Promise.resolve([readPermission]);
+        await connection.manager.save([notes[i], readPermission]);
+      }
+
+      if (i === 2) {
+        notes[i].owner = Promise.resolve(createdUsers[0]);
+        await connection.manager.save([notes[i]]);
+      }
     }
     const foundUsers = await connection.manager.find(User);
     if (!foundUsers) {
