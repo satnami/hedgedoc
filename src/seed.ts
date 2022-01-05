@@ -58,12 +58,14 @@ createConnection({
     users.push(User.create('hardcoded_3', 'Test User 3'));
     const notes: Note[] = [];
     notes.push(Note.create(null, 'test') as Note);
-    notes.push(Note.create(null, 'test2') as Note);
-    notes.push(Note.create(null, 'test3') as Note);
+    notes.push(Note.create(null, 'features') as Note);
+    notes.push(Note.create(null, 'slide-example') as Note);
 
     for (let i = 0; i < 3; i++) {
       const author = connection.manager.create(Author, Author.create(1));
       const user = connection.manager.create(User, users[i]);
+      user.email = 'test@hedgedoc.test';
+      user.photo = '/mock-backend/img/avatar.png';
       const identity = Identity.create(user, ProviderType.LOCAL, false);
       identity.passwordHash = await hashPassword(password);
       connection.manager.create(Identity, identity);
@@ -76,7 +78,8 @@ createConnection({
       const edit = Edit.create(author, 1, 42) as Edit;
       revision.edits = Promise.resolve([edit]);
       notes[i].revisions = Promise.all([revision]);
-      notes[i].userPermissions = Promise.resolve([]);
+      const permission = NoteUserPermission.create(user, notes[i], true);
+      notes[i].userPermissions = Promise.resolve([permission]);
       notes[i].groupPermissions = Promise.resolve([]);
       user.ownedNotes = Promise.resolve([notes[i]]);
       await connection.manager.save([
