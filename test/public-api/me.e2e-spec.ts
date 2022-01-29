@@ -197,22 +197,38 @@ describe('Me', () => {
     expect(response1.body).toHaveLength(0);
 
     const testImage = await fs.readFile('test/public-api/fixtures/test.png');
-    const url0 = await testSetup.mediaService.saveFile(testImage, user, note1);
-    const url1 = await testSetup.mediaService.saveFile(testImage, user, note1);
-    const url2 = await testSetup.mediaService.saveFile(testImage, user, note2);
-    const url3 = await testSetup.mediaService.saveFile(testImage, user, note2);
+    const upload0 = await testSetup.mediaService.saveFile(
+      testImage,
+      user,
+      note1,
+    );
+    const upload1 = await testSetup.mediaService.saveFile(
+      testImage,
+      user,
+      note1,
+    );
+    const upload2 = await testSetup.mediaService.saveFile(
+      testImage,
+      user,
+      note2,
+    );
+    const upload3 = await testSetup.mediaService.saveFile(
+      testImage,
+      user,
+      note2,
+    );
 
     const response = await request(httpServer)
       .get('/api/v2/me/media/')
       .expect('Content-Type', /json/)
       .expect(200);
     expect(response.body).toHaveLength(4);
-    expect(response.body[0].url).toEqual(url0);
-    expect(response.body[1].url).toEqual(url1);
-    expect(response.body[2].url).toEqual(url2);
-    expect(response.body[3].url).toEqual(url3);
-    for (const fileUrl of [url0, url1, url2, url3]) {
-      const fileName = fileUrl.replace('/uploads/', '');
+    expect(response.body[0].url).toEqual(upload0.fileUrl);
+    expect(response.body[1].url).toEqual(upload1.fileUrl);
+    expect(response.body[2].url).toEqual(upload2.fileUrl);
+    expect(response.body[3].url).toEqual(upload3.fileUrl);
+    for (const upload of [upload0, upload1, upload2, upload3]) {
+      const fileName = upload.fileUrl.replace('/uploads/', '');
       // delete the file afterwards
       await fs.unlink(join(uploadPath, fileName));
     }
