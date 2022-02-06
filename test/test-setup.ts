@@ -40,6 +40,7 @@ import { Note } from '../src/notes/note.entity';
 import { NotesModule } from '../src/notes/notes.module';
 import { NotesService } from '../src/notes/notes.service';
 import { PermissionsModule } from '../src/permissions/permissions.module';
+import { PermissionsService } from '../src/permissions/permissions.service';
 import { RevisionsModule } from '../src/revisions/revisions.module';
 import { User } from '../src/users/user.entity';
 import { UsersModule } from '../src/users/users.module';
@@ -63,8 +64,8 @@ export class TestSetup {
   authTokens: AuthTokenWithSecretDto[] = [];
   anonymousNotes: Note[] = [];
   ownedNotes: Note[] = [];
+  permissionsService: PermissionsService;
 }
-
 /**
  * Builder class for TestSetup
  * Should be instantiated with the create() method
@@ -166,6 +167,8 @@ export class TestSetupBuilder {
       this.testSetup.moduleRef.get<AliasService>(AliasService);
     this.testSetup.authService =
       this.testSetup.moduleRef.get<AuthService>(AuthService);
+    this.testSetup.permissionsService =
+      this.testSetup.moduleRef.get<PermissionsService>(PermissionsService);
 
     this.testSetup.app = this.testSetup.moduleRef.createNestApplication();
 
