@@ -7,6 +7,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { Author } from '../authors/author.entity';
 import { NotInDBError } from '../errors/errors';
 import { ConsoleLoggerService } from '../logger/console-logger.service';
 import { Note } from '../notes/note.entity';
@@ -103,11 +104,42 @@ export class RevisionsService {
     return revision;
   }
 
-  toRevisionMetadataDto(revision: Revision): RevisionMetadataDto {
+  async getRevisionAuthors(revision: Revision): Promise<Author[]> {
+    const authors = [];
+    for (const edit of await revision.edits) {
+      authors.push(await edit.author);
+    }
+    return authors;
+  }
+
+  async getRevisionAuthorUsernames(revision: Revision): Promise<string[]> {
+    const authors = await this.getRevisionAuthors(revision);
+    const usernames = [];
+    for (const author of authors) {
+      const user = await author.user;
+      if (user) {
+        usernames.push(user.username);
+      }
+    }
+    return usernames;
+  }
+
+  async getRevisionAnonymousAuthorCount(revision: Revision): Promise<number> {
+    const authors = await this.getRevisionAuthors(revision);
+    return authors.filter((author) => author.user === null).length;
+  }
+
+  async toRevisionMetadataDto(
+    revision: Revision,
+  ): Promise<RevisionMetadataDto> {
     return {
       id: revision.id,
       length: revision.length,
       createdAt: revision.createdAt,
+      authorUsernames: await this.getRevisionAuthorUsernames(revision),
+      anonymousAuthorCount: await this.getRevisionAnonymousAuthorCount(
+        revision,
+      ),
     };
   }
 
@@ -117,6 +149,10 @@ export class RevisionsService {
       content: revision.content,
       length: revision.length,
       createdAt: revision.createdAt,
+      authorUsernames: await this.getRevisionAuthorUsernames(revision),
+      anonymousAuthorCount: await this.getRevisionAnonymousAuthorCount(
+        revision,
+      ),
       patch: revision.patch,
       edits: await Promise.all(
         (
