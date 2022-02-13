@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsNumber, IsString } from 'class-validator';
+import { IsDate, IsNumber, IsString, ValidateNested } from 'class-validator';
 
 import { BaseDto } from '../utils/base.dto.';
+import { EditDto } from './edit.dto';
 import { Revision } from './revision.entity';
 
 export class RevisionDto extends BaseDto {
@@ -40,4 +41,11 @@ export class RevisionDto extends BaseDto {
   @IsDate()
   @ApiProperty()
   createdAt: Date;
+
+  /**
+   * All edit objects which are used in the revision.
+   */
+  @ValidateNested()
+  @ApiProperty()
+  edits: EditDto[];
 }
