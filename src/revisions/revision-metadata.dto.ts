@@ -6,9 +6,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsNumber, IsString } from 'class-validator';
 
+import { BaseDto } from '../utils/base.dto.';
 import { Revision } from './revision.entity';
 
-export class RevisionMetadataDto {
+export class RevisionMetadataDto extends BaseDto {
   /**
    * ID of this revision
    * @example 13

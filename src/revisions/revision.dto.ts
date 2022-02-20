@@ -6,7 +6,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, ValidateNested } from 'class-validator';
 
-import { BaseDto } from '../utils/base.dto.';
 import { EditDto } from './edit.dto';
 import { RevisionMetadataDto } from './revision-metadata.dto';
 
