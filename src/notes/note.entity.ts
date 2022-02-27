@@ -90,9 +90,7 @@ export class Note {
   @JoinTable()
   tags: Promise<Tag[]>;
 
-  @Column({
-    default: 2,
-  })
+  @Column()
   version: number;
 
   @CreateDateColumn()
