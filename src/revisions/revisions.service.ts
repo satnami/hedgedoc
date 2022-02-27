@@ -105,23 +105,16 @@ export class RevisionsService {
   }
 
   async getRevisionAuthors(revision: Revision): Promise<Author[]> {
-    const authors = [];
-    for (const edit of await revision.edits) {
-      authors.push(await edit.author);
-    }
-    return authors;
+    // extract the author from each edit
+    return await Promise.all((await revision.edits).map((edit) => edit.author));
   }
 
   async getRevisionAuthorUsernames(revision: Revision): Promise<string[]> {
     const authors = await this.getRevisionAuthors(revision);
-    const usernames = [];
-    for (const author of authors) {
-      const user = await author.user;
-      if (user) {
-        usernames.push(user.username);
-      }
-    }
-    return usernames;
+    const nullishUsers = await Promise.all(
+      authors.map((author) => author.user),
+    );
+    return nullishUsers.flatMap((user) => (user ? [user.username] : []));
   }
 
   async getRevisionAnonymousAuthorCount(revision: Revision): Promise<number> {
