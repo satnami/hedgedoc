@@ -24,5 +24,5 @@ export class HistoryEntryImportDto extends BaseDto {
    * @example "2020-12-01 12:23:34"
    */
   @IsDate()
-  lastVisited: Date;
+  lastVisitedAt: Date;
 }
